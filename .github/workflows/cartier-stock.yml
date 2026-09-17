@@ -1,0 +1,36 @@
+name: Cartier Stock Check
+
+on:
+  schedule:
+    - cron: "2-59/5 * * * *"
+
+  workflow_dispatch:
+
+jobs:
+  check-stock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python packages
+        run: |
+          pip install -r requirements.txt
+
+      - name: Install Chromium
+        run: |
+          playwright install --with-deps chromium
+
+      - name: Check Cartier stock
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python check_cartier.py
